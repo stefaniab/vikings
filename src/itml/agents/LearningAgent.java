@@ -1,7 +1,6 @@
 package itml.agents;
 
-import itml.cards.Card;
-import itml.cards.CardRest;
+import itml.cards.*;
 import itml.simulator.CardDeck;
 import itml.simulator.StateAgent;
 import itml.simulator.StateBattle;
@@ -61,16 +60,17 @@ public class LearningAgent extends Agent {
 			currentInstance.setDataset(myInstances);
 			
 			int out = (int)classifier_.classifyInstance(currentInstance);
-			System.out.println("Card is " + out);
 			Card selected = allCards.get(out);
 			if(cards.contains(selected)) {
-				System.out.println(selected.getName());
-				return selected;
+				System.out.println("Predicted opponent card: " + selected.getName());
+				//return selected;
+				Card ourCard = getMove(stateBattle, selected);
+				System.out.println("Our card: " + ourCard.getName());
+				return ourCard;
 			}
 		} catch (Exception e) {
 			System.out.println("Error classifying new instance: " + e.toString());
 		}
-		System.out.println("Rest card");
 		return new CardRest();  //To change body of implemented methods use File | Settings | File Templates.
 	}
 
@@ -85,5 +85,28 @@ public class LearningAgent extends Agent {
 		}
 		System.out.println(classifier_);
 		return null;  //To change body of implemented methods use File | Settings | File Templates.
+	}
+	
+	private Card getMove(StateBattle stateBattle, Card opponentCard)
+	{
+		StateAgent a = stateBattle.getAgentState(0);
+		StateAgent o = stateBattle.getAgentState(1);
+		
+		if (a.getStaminaPoints() == 0) return new CardRest();
+		if (a.getStaminaPoints() < 4 && Math.abs(o.getCol() + opponentCard.getCol() - a.getCol()) + Math.abs(o.getRow() + opponentCard.getRow() - a.getRow()) > 3) return new CardRest(); 
+		if (o.getHealthPoints() <= a.getHealthPoints()) 
+		{
+			// attack moves
+			int manhattan = Math.abs(o.getCol() + opponentCard.getCol() - a.getCol()) + Math.abs(o.getRow() + opponentCard.getRow() - a.getRow());
+			if (manhattan < 2) return new CardAttackCardinal();
+			if (manhattan == 2)
+			{
+				if (o.getRow() + opponentCard.getRow() == a.getRow()) return new CardAttackLong(); 
+				if (o.getCol() + opponentCard.getCol() != a.getCol()) return new CardAttackDiagonal();
+			}
+		}
+		
+		
+		return new CardRest();
 	}
 }

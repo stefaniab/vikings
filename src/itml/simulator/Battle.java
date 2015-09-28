@@ -118,6 +118,8 @@ public class Battle {
                 if ( bs.getAgentState( a ).getHealthPoints() > 0 ) {
                     long msStart = System.currentTimeMillis();
                     Card cardAgent = agents[a].act( (StateBattle) bs.clone() );
+                    // EXTRA OUTPUT
+                    System.out.println("Card: " + cardAgent.getName());
                     long msDuration = System.currentTimeMillis() - msStart;
                     if ( msDuration > msPerMove ) {
                        System.out.println("WARNING: Agent " + a + " exceeded time limit in act ("+msDuration+">"+ msPerMove+")");
