@@ -67,6 +67,7 @@ public class LearningAgent extends Agent {
 
 	@Override
 	public Classifier learn(Instances instances) {
+		instances.setClassIndex(instances.numAttributes() -1);
 		try {
 			classifier_.buildClassifier(instances);
 		} catch(Exception e) {
