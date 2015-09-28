@@ -20,6 +20,8 @@ public class LearningAgent extends Agent {
 	private int m_noThisAgent;     // Index of our agent (0 or 1).
 	private int m_noOpponentAgent; // Inex of opponent's agent.
 	private Classifier classifier_;
+	
+	Instances myInstances;
 
 	public LearningAgent( CardDeck deck, int msConstruct, int msPerMove, int msLearn ) {
 		super(deck, msConstruct, msPerMove, msLearn);
@@ -54,7 +56,9 @@ public class LearningAgent extends Agent {
 		try {
 			ArrayList<Card> allCards = m_deck.getCards();
 			ArrayList<Card> cards = m_deck.getCards(a.getStaminaPoints());
-			int out = (int)classifier_.classifyInstance(new Instance(1.0, values.clone()));
+			Instance currentInstance = new Instance(1.0, values.clone());
+			currentInstance.setDataset(myInstances);
+			int out = (int)classifier_.classifyInstance(currentInstance);
 			Card selected = allCards.get(out);
 			if(cards.contains(selected)) {
 				return selected;
@@ -67,6 +71,8 @@ public class LearningAgent extends Agent {
 
 	@Override
 	public Classifier learn(Instances instances) {
+		instances.setClassIndex(instances.numAttributes() - 1);
+		myInstances = instances;
 		try {
 			classifier_.buildClassifier(instances);
 		} catch(Exception e) {

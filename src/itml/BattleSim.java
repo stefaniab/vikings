@@ -84,7 +84,9 @@ public class BattleSim {
         long  msStart, msDuration;
 
         msStart = System.currentTimeMillis();
-        Agent agentMy = new AgentRandom( deck.clone(), msConstruct, msPerMove, msLearning );   // The first agent is yours -- change to yours.
+        
+        Agent agentMy = new LearningAgent( deck.clone(), msConstruct, msPerMove, msLearning );   // The first agent is yours -- change to yours.
+        
         msDuration = System.currentTimeMillis() - msStart;
         System.out.println("Timing agent constructor = " + msDuration );
         if ( msDuration > msConstruct ) {
@@ -92,7 +94,9 @@ public class BattleSim {
         }
 
         msStart = System.currentTimeMillis();
+        
         Agent agentOpp = new AgentTerminator( deck.clone(), msConstruct, msPerMove, msLearning );   // The second agent is your opponent.
+        
         msDuration = System.currentTimeMillis() - msStart;
         System.out.println("Timing agent constructor = " + msDuration );
         if ( msDuration > msConstruct ) {
@@ -120,6 +124,9 @@ public class BattleSim {
         // Give your agent the opportunity to learn.
         System.out.println( "Learning ..." );
         msStart = System.currentTimeMillis();
+        
+        System.out.println("\t \t TRYING TO LEARN");
+        
         agentMy.learn(instances);
         msDuration = System.currentTimeMillis() - msStart;
         System.out.println("Timing agent learner = " + msDuration);
