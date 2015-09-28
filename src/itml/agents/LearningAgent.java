@@ -56,16 +56,21 @@ public class LearningAgent extends Agent {
 		try {
 			ArrayList<Card> allCards = m_deck.getCards();
 			ArrayList<Card> cards = m_deck.getCards(a.getStaminaPoints());
+			
 			Instance currentInstance = new Instance(1.0, values.clone());
 			currentInstance.setDataset(myInstances);
+			
 			int out = (int)classifier_.classifyInstance(currentInstance);
+			System.out.println("Card is " + out);
 			Card selected = allCards.get(out);
 			if(cards.contains(selected)) {
+				System.out.println(selected.getName());
 				return selected;
 			}
 		} catch (Exception e) {
 			System.out.println("Error classifying new instance: " + e.toString());
 		}
+		System.out.println("Rest card");
 		return new CardRest();  //To change body of implemented methods use File | Settings | File Templates.
 	}
 
@@ -78,6 +83,7 @@ public class LearningAgent extends Agent {
 		} catch(Exception e) {
 			System.out.println("Error training classifier: " + e.toString());
 		}
+		System.out.println(classifier_);
 		return null;  //To change body of implemented methods use File | Settings | File Templates.
 	}
 }
