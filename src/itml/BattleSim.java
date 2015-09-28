@@ -86,7 +86,6 @@ public class BattleSim {
         msStart = System.currentTimeMillis();
         
         Agent agentMy = new LearningAgent( deck.clone(), msConstruct, msPerMove, msLearning );   // The first agent is yours -- change to yours.
-        
         msDuration = System.currentTimeMillis() - msStart;
         System.out.println("Timing agent constructor = " + msDuration );
         if ( msDuration > msConstruct ) {
