@@ -92,12 +92,28 @@ public class LearningAgent extends Agent {
 		StateAgent a = stateBattle.getAgentState(0);
 		StateAgent o = stateBattle.getAgentState(1);
 		
+		int manhattan = Math.abs(o.getCol() + opponentCard.getCol() - a.getCol()) + Math.abs(o.getRow() + opponentCard.getRow() - a.getRow());
+		
 		if (a.getStaminaPoints() == 0) return new CardRest();
-		if (a.getStaminaPoints() < 4 && Math.abs(o.getCol() + opponentCard.getCol() - a.getCol()) + Math.abs(o.getRow() + opponentCard.getRow() - a.getRow()) > 3) return new CardRest(); 
+		
+		if (manhattan > 3) 
+		{
+			if (a.getStaminaPoints() < 5 ) return new CardRest(); 
+			if (o.getCol() + opponentCard.getCol() == a.getCol()) 
+			{
+				if (o.getRow() + opponentCard.getRow() < a.getRow()) return new CardMoveDown();
+				else return new CardMoveUp();
+			}
+			if (o.getRow() + opponentCard.getRow() == a.getRow()) 
+			{
+				if (o.getCol() + opponentCard.getCol() < a.getCol()) return new CardMoveLeft();
+				else return new CardMoveRight();
+			}
+		}
+		
 		if (o.getHealthPoints() <= a.getHealthPoints()) 
 		{
 			// attack moves
-			int manhattan = Math.abs(o.getCol() + opponentCard.getCol() - a.getCol()) + Math.abs(o.getRow() + opponentCard.getRow() - a.getRow());
 			if (manhattan < 2) return new CardAttackCardinal();
 			if (manhattan == 2)
 			{
