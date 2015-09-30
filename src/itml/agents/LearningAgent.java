@@ -6,6 +6,7 @@ import itml.simulator.StateAgent;
 import itml.simulator.StateBattle;
 import weka.classifiers.Classifier;
 import weka.classifiers.functions.MultilayerPerceptron;
+import weka.classifiers.pmml.consumer.NeuralNetwork;
 import weka.classifiers.trees.J48;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -69,6 +70,8 @@ public class LearningAgent extends Agent {
 				Card ourCard = getMove(stateBattle, selected);
 				System.out.print("Predicted opponent card: " + selected.getName() + " ");
 				System.out.println("Our card: " + ourCard.getName());
+				//System.out.println("Predicted opponent card: " + selected.getName());
+				//return selected;
 				return ourCard;
 			}
 		} catch (Exception e) {
@@ -86,7 +89,7 @@ public class LearningAgent extends Agent {
 		} catch(Exception e) {
 			System.out.println("Error training classifier: " + e.toString());
 		}
-		System.out.println(classifier_);
+		//System.out.println(classifier_);
 		return null;  //To change body of implemented methods use File | Settings | File Templates.
 	}
 	
