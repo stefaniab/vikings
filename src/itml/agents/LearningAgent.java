@@ -27,8 +27,8 @@ public class LearningAgent extends Agent {
 
 	public LearningAgent( CardDeck deck, int msConstruct, int msPerMove, int msLearn ) {
 		super(deck, msConstruct, msPerMove, msLearn);
-		//classifier_ = new J48();
-		classifier_ = new MultilayerPerceptron();
+		classifier_ = new J48();
+		//classifier_ = new MultilayerPerceptron();
 	}
 
 	@Override
@@ -66,10 +66,12 @@ public class LearningAgent extends Agent {
 			int out = (int)classifier_.classifyInstance(currentInstance);
 			Card selected = allCards.get(out);
 			if(cards.contains(selected)) {
-				//System.out.println("Predicted opponent card: " + selected.getName());
 				//return selected;
 				Card ourCard = getMove(stateBattle, selected);
-				//System.out.println("Our card: " + ourCard.getName());
+				System.out.print("Predicted opponent card: " + selected.getName() + " ");
+				System.out.println("Our card: " + ourCard.getName());
+				//System.out.println("Predicted opponent card: " + selected.getName());
+				//return selected;
 				return ourCard;
 			}
 		} catch (Exception e) {
@@ -93,18 +95,31 @@ public class LearningAgent extends Agent {
 	
 	private Card getMove(StateBattle stateBattle, Card opponentCard)
 	{
+		
 		Random random = new Random();
 		StateAgent a = stateBattle.getAgentState(m_noThisAgent);
 		StateAgent o = stateBattle.getAgentState(m_noOpponentAgent);
-		System.out.println("BATTLESTATE: health/stamina a: " + a.getHealthPoints() + " " + a.getStaminaPoints() + " o: "+ o.getHealthPoints() + " " + o.getStaminaPoints());
-		System.out.println("Location: " + a.getRow() + " " + a.getCol() + " " + o.getRow() + " " + o.getCol());
+
+		drawBoard(a, o);
 		
 		int manhattan = Math.abs(o.getCol() + opponentCard.getCol() - a.getCol()) + Math.abs(o.getRow() + opponentCard.getRow() - a.getRow());
 		int currentManhattan = Math.abs(o.getCol() - a.getCol()) + Math.abs(o.getRow() - a.getRow());
-		System.out.println("manhattan: " + manhattan);
+		
+		System.out.print("BATTLESTATE: health/stamina a: " + a.getHealthPoints() + " " + a.getStaminaPoints() + " o: "+ o.getHealthPoints() + " " + o.getStaminaPoints() + " ");
+		System.out.print("Location: " + a.getRow() + " " + a.getCol() + " " + o.getRow() + " " + o.getCol() + " ");
+		
+		System.out.println("current manhattan : " + currentManhattan + " predicted manhattan : " + manhattan);
 		
 		// Resting
-		if (a.getStaminaPoints() == 0 || a.getStaminaPoints() < 5 && manhattan > 3) return new CardRest();
+		if (a.getStaminaPoints() == 0 || a.getStaminaPoints() < 4 && manhattan > 3) return new CardRest();
+		
+		// Special case
+		if (o.getStaminaPoints() == 0 && a.getStaminaPoints() > 1)
+		{
+			if (currentManhattan == 0) return new CardAttackCardinal();
+			if (currentManhattan == 1) return new CardAttackDiagonal();
+			if (currentManhattan == 2 && a.getRow() == o.getRow()) return new CardAttackLong();
+		}
 		
 		// Aggressive
 		if (a.getHealthPoints() > o.getHealthPoints())
@@ -190,6 +205,7 @@ public class LearningAgent extends Agent {
 			// try to move away
 			int predictedOpponentCol = o.getCol() + opponentCard.getCol();
 			int predictedOpponentRow = o.getRow() + opponentCard.getRow();
+			// try switching < sign
 			if (Math.abs(a.getCol() - predictedOpponentCol) > Math.abs(a.getRow() - predictedOpponentRow))
 			{
 				// try to move horizontally
@@ -218,7 +234,7 @@ public class LearningAgent extends Agent {
 		else
 		{
 			System.out.println("Equal life");
-			if (manhattan > 3) 
+			if (currentManhattan > 3) 
 			{
 				// if we're far away, we rest or move closer
 				System.out.println("try to move closer ");
@@ -261,7 +277,7 @@ public class LearningAgent extends Agent {
 				if (a.getCol() + opponentCard.getCol() > 0 && a.getCol() + opponentCard.getCol() < 5 && a.getRow() + opponentCard.getRow() > 0 && a.getRow() + opponentCard.getRow() < 5 && random.nextDouble() < 0.2) return opponentCard;
 				return new CardAttackDiagonal(); 
 			}
-			if (Math.abs(a.getCol() - (o.getCol() + opponentCard.getCol())) == 2 && a.getStaminaPoints() > 1)
+			if (a.getRow() == o.getRow() + opponentCard.getRow() && Math.abs(a.getCol() - (o.getCol() + opponentCard.getCol())) == 2 && a.getStaminaPoints() > 1)
 			{
 				if(random.nextDouble() < 0.5) 
 				{
@@ -282,7 +298,37 @@ public class LearningAgent extends Agent {
 				if (a.getCol() + opponentCard.getCol() > 0 && a.getCol() + opponentCard.getCol() < 5 && a.getRow() + opponentCard.getRow() > 0 && a.getRow() + opponentCard.getRow() < 5 && random.nextDouble() < 0.2) return opponentCard;
 				return new CardAttackLong();
 			}
-			if (manhattan != 0) return getRandomMove(a);
+			if (manhattan != 0) 
+			{
+				// else move closer
+				if (o.getCol() + opponentCard.getCol() == a.getCol()) 
+				{
+					if (o.getRow() + opponentCard.getRow() < a.getRow()) return new CardMoveDown();
+					else return new CardMoveUp();
+				}
+				else if (o.getRow() + opponentCard.getRow() == a.getRow()) 
+				{
+					if (o.getCol() + opponentCard.getCol() < a.getCol()) return new CardMoveLeft();
+					else return new CardMoveRight();
+				}
+				// vertical move
+				if (random.nextBoolean())
+				{
+					if (a.getRow() > o.getRow()) return new CardMoveDown();
+					else return new CardMoveUp();
+				}
+				else
+				{
+					if (a.getCol() > o.getCol()) 
+					{
+						if (a.getCol() > 1 && random.nextBoolean()) return new CardLeapLeft();
+						return new CardMoveLeft();
+					}
+					if (a.getCol() < 3 && random.nextBoolean()) return new CardLeapRight();
+					else return new CardMoveRight();
+				}
+
+			}
 			if (manhattan == 0)
 			{
 				if (a.getStaminaPoints() > 1)
@@ -298,72 +344,13 @@ public class LearningAgent extends Agent {
 		}
 		
 		
-		System.out.println("No option - old version used");
-		
-		if (manhattan > 3) 
-		{
-			// if we're far away, we rest or move closer
-			System.out.println("try to move closer ");
-			if (o.getCol() + opponentCard.getCol() == a.getCol()) 
-			{
-				if (o.getRow() + opponentCard.getRow() < a.getRow()) return new CardMoveDown();
-				else return new CardMoveUp();
-			}
-			else if (o.getRow() + opponentCard.getRow() == a.getRow()) 
-			{
-				if (o.getCol() + opponentCard.getCol() < a.getCol()) return new CardMoveLeft();
-				else return new CardMoveRight();
-			}
-			// vertical move
-			System.out.println("Last option");
-			if (random.nextBoolean())
-			{
-				if (a.getRow() > o.getRow()) return new CardMoveDown();
-				else return new CardMoveUp();
-			}
-			else
-			{
-				if (a.getCol() > o.getCol()) 
-				{
-					if (a.getCol() > 1 && random.nextBoolean()) return new CardLeapLeft();
-					return new CardMoveLeft();
-				}
-				if (a.getCol() < 3 && random.nextBoolean()) return new CardLeapRight();
-				else return new CardMoveRight();
-			}
-		}
-		
-		if (o.getHealthPoints() <= a.getHealthPoints() && a.getStaminaPoints() >= 2); 
-		{
-			// attack moves
-			//if (random.nextBoolean()) return getRandomMove(a);
-			System.out.println("try to attack");
-			
-			if (manhattan < 2) return new CardAttackCardinal();
-			if (manhattan == 2)
-			{
-				if (o.getRow() + opponentCard.getRow() == a.getRow()) return new CardAttackLong(); 
-				if (o.getCol() + opponentCard.getCol() != a.getCol()) return new CardAttackDiagonal();
-			}
-			System.out.println("not in range");
-			if (o.getCol() + opponentCard.getCol() == a.getCol()) 
-			{
-				if (o.getRow() + opponentCard.getRow() < a.getRow()) return new CardMoveDown();
-				else return new CardMoveUp();
-			}
-			if (o.getRow() + opponentCard.getRow() == a.getRow()) 
-			{
-				if (o.getCol() + opponentCard.getCol() < a.getCol()) return new CardMoveLeft();
-				else return new CardMoveRight();
-			}
-		}
-		
 		System.out.println("DEFAULT CARD: rest");
 		return new CardRest();
 	}
 	
 	Card getRandomMove(StateAgent a)
 	{
+		System.out.println("RANDOM MOVE");
 		Random random = new Random();
 		while(true)
 		{
@@ -399,5 +386,21 @@ public class LearningAgent extends Agent {
 				if (a.getCol() < 3) return new CardLeapRight();
 			}
 		}
+	}
+	
+	public void drawBoard(StateAgent a, StateAgent o)
+	{
+		for (int i = 4; i >= 0; i--)
+		{
+			System.out.print("|");
+			for (int j = 0; j < 5; j++)
+			{
+				if (a.getRow() == i && a.getCol() == j) System.out.print("a");
+				else if (o.getRow() == i && o.getCol() == j) System.out.print("o");
+				else System.out.print(" ");
+			}
+			System.out.println("|");
+		}
+		
 	}
 }

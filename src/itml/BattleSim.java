@@ -94,7 +94,8 @@ public class BattleSim {
 
         msStart = System.currentTimeMillis();
         
-        Agent agentOpp = new AgentChicken( deck.clone(), msConstruct, msPerMove, msLearning );   // The second agent is your opponent.        
+        Agent agentOpp = new AgentChicken( deck.clone(), msConstruct, msPerMove, msLearning );   // The second agent is your opponent.
+
         msDuration = System.currentTimeMillis() - msStart;
         System.out.println("Timing agent constructor = " + msDuration );
         if ( msDuration > msConstruct ) {
@@ -265,4 +266,6 @@ public class BattleSim {
 
         return new Instances( "AgentBattleHistory", attributes, 0 );
     }
+    
+    
 }
