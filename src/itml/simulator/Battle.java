@@ -90,7 +90,8 @@ public class Battle {
     */
     public void run( boolean doDebug, int maxSteps, int msPerMove, Agent[] agents, double [] score, GameLog log ) {
 
-
+    	System.out.println();
+    	System.out.println("NEW GAME");
         StateBattle bs = new StateBattle( m_numColumns, m_numRows, maxSteps, m_stateAgents);
 
         log.clear();
