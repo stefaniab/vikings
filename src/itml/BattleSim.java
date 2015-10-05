@@ -5,9 +5,11 @@ import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.Random;
+
 import itml.simulator.*;
 import itml.cards.*;
 
@@ -37,7 +39,8 @@ public class BattleSim {
         // Default arguments.
         int numStepsInGame   = 30;     // Maximum step length of a game.
         int numTrainingGames = 10;     // Number of games to play in the training phase.
-        int numPlayingGames  = 100;    // Number of games to play in the evaluation phase.
+        //int numPlayingGames  = 100;    // Number of games to play in the evaluation phase.
+        int numPlayingGames = 1000;
         int msConstruct      = 5000;   // Maximum time to use in Agent constructor (in ms.)
         int msPerMove        = 50;     // Maximum time to use per act, startGame, endGame call.
         int msLearning       = 30000;  // Maximum time to use in the learning call.
@@ -83,9 +86,14 @@ public class BattleSim {
         // Create agents that will compete.
         long  msStart, msDuration;
 
-        msStart = System.currentTimeMillis();
         
-        Agent agentMy = new LearningAgent( deck.clone(), msConstruct, msPerMove, msLearning );   // The first agent is yours -- change to yours.
+        msStart = System.currentTimeMillis();
+        Agent agentMy = new MyAgent( deck.clone(), msConstruct, msPerMove, msLearning );   // The first agent is yours -- change to yours.
+
+        MyAgent agentMy2 = (MyAgent) agentMy;
+        Predictor predictor = new Predictor(agentMy2);
+        agentMy2.setPredictor(predictor);
+        
         msDuration = System.currentTimeMillis() - msStart;
         System.out.println("Timing agent constructor = " + msDuration );
         if ( msDuration > msConstruct ) {
@@ -94,7 +102,7 @@ public class BattleSim {
 
         msStart = System.currentTimeMillis();
         
-        Agent agentOpp = new AgentChicken( deck.clone(), msConstruct, msPerMove, msLearning );   // The second agent is your opponent.
+        Agent agentOpp = new AgentTerminator( deck.clone(), msConstruct, msPerMove, msLearning );   // The second agent is your opponent.
 
         msDuration = System.currentTimeMillis() - msStart;
         System.out.println("Timing agent constructor = " + msDuration );
@@ -110,7 +118,7 @@ public class BattleSim {
                   new AgentTerminator( deck.clone(), msConstruct, msPerMove, msLearning )
                };
         Instances instances = generateTrainingData( battle, numTrainingGames, numStepsInGame, msPerMove,
-                                                    agentOpp, agentsSparringPartners );
+                                                    agentOpp, agentsSparringPartners, null );
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter( "history.arff"));
             writer.write( instances.toString() );
@@ -141,16 +149,22 @@ public class BattleSim {
         double scoreOpp = 0.0;
         GameLog log = new GameLog();
         for ( int n=0; n < numPlayingGames ; n++ ) {
-            int  indexMyAgent  = n % 2;
+            System.out.println("OUR SCORE " + scoreMy + " OPPONENT SCORE " + scoreOpp);
+        	int  indexMyAgent  = n % 2;
             int  indexOppAgent = (indexMyAgent == 0) ? 1 : 0;
             agents[indexMyAgent] = agentMy;
             agents[indexOppAgent] = agentOpp;
-            battle.run( false, numStepsInGame, msPerMove, agents, score, log );
+            battle.run( false, numStepsInGame, msPerMove, agents, score, log, predictor );
             scoreMy += score[indexMyAgent];
             scoreOpp += score[indexOppAgent];
         }
         System.out.println( "My score = " + scoreMy + "  Opponent score = " + scoreOpp );
         System.out.println();
+        
+        
+        predictor.print();
+        agentMy2.printClassifier();
+        
     }
 
     /**
@@ -167,7 +181,7 @@ public class BattleSim {
      * @return                   WEKA Instances object.
      */
     static private Instances generateTrainingData( Battle battle, int numTrainingGames, int numStepsInGame,
-                                                   int msPerMove, Agent agent, Agent[] agentsSparring )
+                                                   int msPerMove, Agent agent, Agent[] agentsSparring, Predictor p )
     {
         Random random = new Random();
         Instances instances = createInstances( battle.getDeck() );
@@ -195,7 +209,7 @@ public class BattleSim {
 
             // Run a game.
             log.clear();
-            battle.run( false, numStepsInGame, msPerMove, agents, score, log );
+            battle.run( false, numStepsInGame, msPerMove, agents, score, log, null );
             scoreTotal[0] += score[indexA];
             scoreTotal[1] += score[indexO];
 

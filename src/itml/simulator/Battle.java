@@ -1,6 +1,8 @@
 package itml.simulator;
 
 import java.util.ArrayList;
+
+import itml.Predictor;
 import itml.agents.Agent;
 import itml.cards.Card;
 import itml.cards.CardRest;
@@ -88,10 +90,12 @@ public class Battle {
     * @param  log         A GameLog, in whicch the progression of the game will be logged into.
     *
     */
-    public void run( boolean doDebug, int maxSteps, int msPerMove, Agent[] agents, double [] score, GameLog log ) {
+    public void run( boolean doDebug, int maxSteps, int msPerMove, Agent[] agents, double [] score, GameLog log, Predictor p ) {
 
+    	
     	System.out.println();
     	System.out.println("NEW GAME");
+    	System.out.println("AGENTS: " + agents[0].toString() + " " + agents[1].toString());
         StateBattle bs = new StateBattle( m_numColumns, m_numRows, maxSteps, m_stateAgents);
 
         log.clear();
@@ -120,7 +124,10 @@ public class Battle {
                     long msStart = System.currentTimeMillis();
                     Card cardAgent = agents[a].act( (StateBattle) bs.clone() );
                     // EXTRA OUTPUT
-                    //System.out.println("Card: " + cardAgent.getName());
+                    System.out.println("Card for " + a + " : " + cardAgent.getName());
+                    
+                    if (p != null) p.checkGuess(cardAgent, a);
+                    
                     long msDuration = System.currentTimeMillis() - msStart;
                     if ( msDuration > msPerMove ) {
                        System.out.println("WARNING: Agent " + a + " exceeded time limit in act ("+msDuration+">"+ msPerMove+")");
