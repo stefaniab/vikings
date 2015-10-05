@@ -53,15 +53,15 @@ public class MyAgent extends Agent {
 		tree.setConfidenceFactor(0.3f);
 		classifier_ = tree;
 		J48 tree2 = new J48();
-		tree2.setMinNumObj(1);
-		tree2.setConfidenceFactor(0.45f);
+		tree2.setMinNumObj(100);
+		tree2.setConfidenceFactor(0.3f);
 		classifier2 = tree2;
 		//classifier_ = new MultilayerPerceptron();
 		//classifier_ = new NaiveBayes();
 		//classifier_ = new IBk();
 		// J48
 		
-		if (useModified) classifier_ = classifier2;
+		//if (useModified) classifier_ = classifier2;
 		
 	}
 
@@ -81,8 +81,6 @@ public class MyAgent extends Agent {
 	@Override
 	public Card act(StateBattle stateBattle) {
 		System.out.println(stateBattle);
-		//StateAgent a = stateBattle.getAgentState(0);
-		//StateAgent o = stateBattle.getAgentState(1);
 		StateAgent a = stateBattle.getAgentState(m_noOpponentAgent);
 		StateAgent o = stateBattle.getAgentState(m_noThisAgent);
 		double[] values = new double[8];
@@ -107,7 +105,15 @@ public class MyAgent extends Agent {
 			modValues[7] = o.getStaminaPoints();
 			modValues[8] = modValues[0] - modValues[4];
 			modValues[9] = modValues[1] - modValues[5];
-			if (modValues[8] < 0) modValues[8] = -1.0 * modValues[8];
+			
+			if (modValues[1] == 0) {}
+        	else if (modValues[4] > 3.5) modValues[4] = 2.0;
+        	else modValues[4] = 1.0;
+        	if (modValues[5] == 0) {}
+        	else if (modValues[5] > 3.5) modValues[5] = 2.0;
+        	else modValues[5] = 1.0;
+			
+        	if (modValues[8] < 0) modValues[8] = -1.0 * modValues[8];
         	if (modValues[9] < 0) modValues[9] = -1.0 * modValues[9];
 		}
 		try {
@@ -120,13 +126,13 @@ public class MyAgent extends Agent {
 			if (!useModified) currentInstance.setDataset(myInstances);
 			else currentInstance.setDataset(modifiedInstances);
 			
-			double[] probabilities;
+			/*double[] probabilities;
 			if (!useModified) probabilities = classifier_.distributionForInstance(currentInstance);
 			else probabilities = classifier2.distributionForInstance(currentInstance);
 			for (int i = 0; i < probabilities.length; i++)
 			{
 				System.out.println("Probability of card " + allCards.get(i).getName() + " : " + probabilities[i]);
-			}
+			}*/
 			
 			int out;
 			if (!useModified) out = (int)classifier_.classifyInstance(currentInstance);
@@ -157,7 +163,7 @@ public class MyAgent extends Agent {
 		instances.setClassIndex(instances.numAttributes() - 1);
 		myInstances = instances;
 		
-		System.out.println("ORIGINAL");
+		/*System.out.println("ORIGINAL");
 		for (int i = 0; i < myInstances.numInstances(); i++)
 		{
 			Instance instance = myInstances.instance(i);
@@ -166,13 +172,13 @@ public class MyAgent extends Agent {
 				System.out.print(instance.value(j) + " ");
 			}
 			System.out.println();
-		}
+		}*/
 		
 		if (useModified) 
 		{
 			modifiedInstances();
 			modifiedInstances.setClassIndex(modifiedInstances.numAttributes() - 1);
-			System.out.println("MODIFIED");
+			/*System.out.println("MODIFIED");
 			for (int i = 0; i < modifiedInstances.numInstances(); i++)
 			{
 				Instance instance = modifiedInstances.instance(i);
@@ -181,7 +187,7 @@ public class MyAgent extends Agent {
 					System.out.print(instance.value(j) + " ");
 				}
 				System.out.println();
-			}
+			}*/
 		}
 		
 		try {
@@ -193,7 +199,7 @@ public class MyAgent extends Agent {
 		System.out.println(classifier_);
 		if (useModified) System.out.println(classifier2);
 		
-		if (useModified) classifier_ = classifier2;
+		// if (useModified) classifier_ = classifier2;
 		return null;  //To change body of implemented methods use File | Settings | File Templates.
 	}
 	
@@ -515,13 +521,15 @@ public class MyAgent extends Agent {
         StateAgent asOpp  = stateBattle.getAgentState( m_noOpponentAgent );
         if (asThis.getHealthPoints() == 0 && asOpp.getHealthPoints() > 0 ) return -1000;
         else if (asOpp.getHealthPoints() == 0 && asThis.getHealthPoints() > 0 ) return 1000;
-		int rating = 0;
+		
+        int rating = 0;
 		Random random = new Random();
 		rating += random.nextInt(10);
 		// health difference
 		rating += 50 * (asThis.getHealthPoints() - asOpp.getHealthPoints());
 		// stamina difference
-		rating += 5 * (Math.min(asThis.getStaminaPoints(), 10) - Math.min(10, asOpp.getStaminaPoints()));
+		//rating += 5 * (Math.min(asThis.getStaminaPoints(), 10) - Math.min(10, asOpp.getStaminaPoints()));
+		rating += 8 * Math.floor(Math.sqrt(asThis.getStaminaPoints()) - Math.sqrt(asOpp.getStaminaPoints()));
 		// proximity
 		int manhattan = Math.abs(asThis.getCol() - asOpp.getCol()) + Math.abs(asThis.getRow() - asOpp.getRow());
 		
@@ -531,6 +539,12 @@ public class MyAgent extends Agent {
 		if (asThis.getHealthPoints() > asOpp.getHealthPoints() ||
 				asThis.getHealthPoints() == asOpp.getHealthPoints() && asThis.getStaminaPoints() > asOpp.getStaminaPoints() )
 		{
+			int x = Math.abs(2 - asThis.getCol());
+			int y = Math.abs(2 - asThis.getRow());
+			if (x == 0) rating += 3;
+			else if (x == 1) rating += 2;
+			if (y == 0) rating += 3;
+			else if (y == 1) rating += 2;
 			rating -= manhattan * 5;
 		}
 		else if (asThis.getHealthPoints() != asOpp.getHealthPoints() && asThis.getStaminaPoints() != asOpp.getStaminaPoints())
@@ -655,7 +669,8 @@ public class MyAgent extends Agent {
 	}
 
 	public void printClassifier() {
-		System.out.println(classifier_);
+		if (useModified) System.out.println(classifier2);
+		else System.out.println(classifier_);
 	}
 	
 	public void modifiedInstances()
@@ -698,12 +713,28 @@ public class MyAgent extends Agent {
         	{
         		values[j] = instance.value(j);
         	}
+        	
+        	
         	values[8] = values[0] - values[4];
         	values[9] = values[1] - values[5];
         	if (values[8] < 0) values[8] = -1.0 * values[8];
         	if (values[9] < 0) values[9] = -1.0 * values[9];
+        	// experiment - simplify the rows
+        	if (values[1] == 0) {}
+        	else if (values[4] > 3.5) values[4] = 2.0;
+        	else values[4] = 1.0;
+        	if (values[5] == 0) {}
+        	else if (values[5] > 3.5) values[5] = 2.0;
+        	else values[5] = 1.0;
+        	
         	values[10] = myInstances.attribute(8).indexOfValue(instance.stringValue(8));
-        	modifiedInstances.add(new Instance(1.0, values.clone()));
+        	if (instance.stringValue(8).startsWith("cAttack"))
+        	{
+        		//System.out.println(instance.stringValue(8));
+        		// attack actions have higher weight
+        		modifiedInstances.add(new Instance(1.0, values.clone()));
+        	}
+        	else modifiedInstances.add(new Instance(1.0, values.clone()));
         }
 	}
 }

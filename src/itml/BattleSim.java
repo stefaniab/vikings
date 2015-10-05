@@ -38,7 +38,7 @@ public class BattleSim {
 
         // Default arguments.
         int numStepsInGame   = 30;     // Maximum step length of a game.
-        int numTrainingGames = 10;     // Number of games to play in the training phase.
+        int numTrainingGames = 1000;     // Number of games to play in the training phase.
         //int numPlayingGames  = 100;    // Number of games to play in the evaluation phase.
         int numPlayingGames = 1000;
         int msConstruct      = 5000;   // Maximum time to use in Agent constructor (in ms.)
@@ -102,7 +102,7 @@ public class BattleSim {
 
         msStart = System.currentTimeMillis();
         
-        Agent agentOpp = new AgentTerminator( deck.clone(), msConstruct, msPerMove, msLearning );   // The second agent is your opponent.
+        Agent agentOpp = new AgentMixed( deck.clone(), msConstruct, msPerMove, msLearning );   // The second agent is your opponent.
 
         msDuration = System.currentTimeMillis() - msStart;
         System.out.println("Timing agent constructor = " + msDuration );
@@ -158,12 +158,12 @@ public class BattleSim {
             scoreMy += score[indexMyAgent];
             scoreOpp += score[indexOppAgent];
         }
+        agentMy2.printClassifier();
         System.out.println( "My score = " + scoreMy + "  Opponent score = " + scoreOpp );
         System.out.println();
         
         
         predictor.print();
-        agentMy2.printClassifier();
         
     }
 
