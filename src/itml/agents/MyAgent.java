@@ -53,8 +53,7 @@ public class MyAgent extends Agent {
 		tree.setConfidenceFactor(0.3f);
 		classifier_ = tree;
 		J48 tree2 = new J48();
-		tree2.setMinNumObj(1);
-		//tree2.setConfidenceFactor(0.45f);
+		tree2.setMinNumObj(50);
 		tree2.setConfidenceFactor(0.3f);
 		classifier2 = tree2;
 		//classifier_ = new MultilayerPerceptron();
@@ -71,6 +70,7 @@ public class MyAgent extends Agent {
 		// Remember the indicies of the agents in the StateBattle.
 		m_noThisAgent = noThisAgent;
 		m_noOpponentAgent  = (noThisAgent == 0 ) ? 1 : 0; // can assume only 2 agents battling.
+		predictor.setID(m_noOpponentAgent);
 	}
 
 	@Override
@@ -142,12 +142,11 @@ public class MyAgent extends Agent {
 			else out =  (int)classifier2.classifyInstance(currentInstance);
 			
 			Card selected = allCards.get(out);
-			predictor.setID(m_noOpponentAgent);
 			predictor.setCard(selected);
+			System.out.print("Predicted opponent card: " + selected.getName() + " ");
 			if(cards.contains(selected)) {
 				//return selected;
 				Card ourCard = getMove1(stateBattle, selected);
-				System.out.print("Predicted opponent card: " + selected.getName() + " ");
 				System.out.println("Our card: " + ourCard.getName());
 				//System.out.println("Predicted opponent card: " + selected.getName());
 				//return selected;
@@ -203,7 +202,7 @@ public class MyAgent extends Agent {
 		} catch(Exception e) {
 			System.out.println("Error training classifier: " + e.toString());
 		}
-		System.out.println(classifier_);
+		//System.out.println(classifier_);
 		if (useModified) System.out.println(classifier2);
 		
 		// if (useModified) classifier_ = classifier2;
@@ -485,6 +484,7 @@ public class MyAgent extends Agent {
         	// 2 STEP SEARCH
         	// get opponent card
         	Card newOpponentCard = getOpponentCard(newState);
+        	System.out.println("Next level opponent move " + newOpponentCard.getName());
         	StateAgent newAsThis = newState.getAgentState(m_noThisAgent);
 
         	// get set of possible cards
@@ -507,7 +507,7 @@ public class MyAgent extends Agent {
         			//newBestCard = newCard;
         			newBestRating = newStateRating;
         		}
-        		//System.out.println("\t LEVEL 2 OF SEARCH " + newCard.getName() + " rating " + newStateRating);
+        		System.out.println("\t LEVEL 2 OF SEARCH " + newCard.getName() + " rating " + newStateRating);
         	}*/
         	//System.out.println("LEVEL 1 OF SEARCH " + card.getName() + " rating " + newBestRating);
         	//if (newBestRating > bestRating)
@@ -543,9 +543,11 @@ public class MyAgent extends Agent {
 		rating += 8 * Math.floor(Math.sqrt(asThis.getStaminaPoints()) - Math.sqrt(asOpp.getStaminaPoints()));
 		// proximity
 		int manhattan = Math.abs(asThis.getCol() - asOpp.getCol()) + Math.abs(asThis.getRow() - asOpp.getRow());
+		if (asOpp.getStaminaPoints() == 0 && manhattan == 0 && asThis.getStaminaPoints() > 1) rating += 20;
+		//if (asOpp.getStaminaPoints() == 0 && manhattan == 1 && asThis.getStaminaPoints() > 1) rating += 10;
 		
 		// Testing stamina penalty
-		if (asThis.getStaminaPoints() < 2) rating -= 30;
+		if (asThis.getStaminaPoints() < 2) rating -= 20;
 		
 		if (asThis.getHealthPoints() > asOpp.getHealthPoints() ||
 				asThis.getHealthPoints() == asOpp.getHealthPoints() && asThis.getStaminaPoints() > asOpp.getStaminaPoints() )
@@ -562,7 +564,9 @@ public class MyAgent extends Agent {
 		{
 			rating += manhattan * 5;
 		}
-		else rating -= manhattan * 2;
+		if (stateBattle.getStepNumber() < 10) rating -= manhattan * 1;
+		else if (stateBattle.getStepNumber() < 20) rating -= manhattan * 2;
+		else if (stateBattle.getStepNumber() < 30) rating -= manhattan * 3;
 		//System.out.println(stateBattle);
 		//System.out.println("has rating " + rating);
 		
@@ -640,7 +644,7 @@ public class MyAgent extends Agent {
 		values[5] = o.getRow();
 		values[6] = o.getHealthPoints();
 		values[7] = o.getStaminaPoints();
-		double[] modValues = new double[10];
+		double[] modValues = new double[11];
 		if (useModified)
 		{
 			modValues[0] = a.getCol();
@@ -653,17 +657,23 @@ public class MyAgent extends Agent {
 			modValues[7] = o.getStaminaPoints();
 			modValues[8] = modValues[0] - modValues[4];
 			modValues[9] = modValues[1] - modValues[5];
+			modValues[10] = modValues[2] - modValues[6];
 		}
 		try {
 			ArrayList<Card> allCards = m_deck.getCards();
 			ArrayList<Card> cards = m_deck.getCards(a.getStaminaPoints());
 			
 			Instance currentInstance;
-			currentInstance = new Instance(1.0, values.clone());
 			if (useModified) currentInstance = new Instance(1.0, modValues.clone());
-			currentInstance.setDataset(myInstances);
+			else currentInstance = new Instance(1.0, values.clone());
+			
+			if (useModified) currentInstance.setDataset(modifiedInstances); 
+			else currentInstance.setDataset(myInstances);
+			
 			//for (int i = 0; i < 8; i++) System.out.println(values[i] + " ");
-			int out = (int)classifier_.classifyInstance(currentInstance);
+			int out;
+			if (useModified) out = (int) classifier2.classifyInstance(currentInstance);
+			else out = (int)classifier_.classifyInstance(currentInstance);
 			Card selected = allCards.get(out);
 			if(cards.contains(selected)) {
 				return selected;
