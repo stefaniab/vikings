@@ -53,7 +53,7 @@ public class MyAgent extends Agent {
 		tree.setConfidenceFactor(0.3f);
 		classifier_ = tree;
 		J48 tree2 = new J48();
-		tree2.setMinNumObj(100);
+		tree2.setMinNumObj(150);
 		tree2.setConfidenceFactor(0.3f);
 		classifier2 = tree2;
 		//classifier_ = new MultilayerPerceptron();
@@ -92,7 +92,7 @@ public class MyAgent extends Agent {
 		values[5] = o.getRow();
 		values[6] = o.getHealthPoints();
 		values[7] = o.getStaminaPoints();
-		double[] modValues = new double[10];
+		double[] modValues = new double[11];
 		if (useModified)
 		{
 			modValues[0] = a.getCol();
@@ -105,14 +105,15 @@ public class MyAgent extends Agent {
 			modValues[7] = o.getStaminaPoints();
 			modValues[8] = modValues[0] - modValues[4];
 			modValues[9] = modValues[1] - modValues[5];
-			
+			modValues[10] = modValues[2] - modValues[6];
+			/*
 			if (modValues[1] == 0) {}
         	else if (modValues[4] > 3.5) modValues[4] = 2.0;
         	else modValues[4] = 1.0;
         	if (modValues[5] == 0) {}
         	else if (modValues[5] > 3.5) modValues[5] = 2.0;
         	else modValues[5] = 1.0;
-			
+			*/
         	if (modValues[8] < 0) modValues[8] = -1.0 * modValues[8];
         	if (modValues[9] < 0) modValues[9] = -1.0 * modValues[9];
 		}
@@ -210,7 +211,7 @@ public class MyAgent extends Agent {
 		StateAgent a = stateBattle.getAgentState(m_noThisAgent);
 		StateAgent o = stateBattle.getAgentState(m_noOpponentAgent);
 
-		drawBoard(a, o);
+		//drawBoard(a, o);
 		
 		int manhattan = Math.abs(o.getCol() + opponentCard.getCol() - a.getCol()) + Math.abs(o.getRow() + opponentCard.getRow() - a.getRow());
 		int currentManhattan = Math.abs(o.getCol() - a.getCol()) + Math.abs(o.getRow() - a.getRow());
@@ -700,12 +701,13 @@ public class MyAgent extends Agent {
         attributes.addElement(new Attribute("o_stamina"));
         attributes.addElement(new Attribute("delta_x"));
         attributes.addElement(new Attribute("delta_y"));
+        attributes.addElement(new Attribute("delta_h"));
         // Add the class, the action the a_ agent took in the given state (nominal).
         attributes.addElement(new Attribute("a_action", actions));
         
         modifiedInstances = new Instances( "ModAgentBattleHistory", attributes, 0 );
         
-        double[] values = new double[myInstances.numAttributes() + 2];
+        double[] values = new double[myInstances.numAttributes() + 3];
         for (int i = 0; i < myInstances.numInstances(); i++)
         {
         	Instance instance = myInstances.instance(i);
@@ -719,15 +721,17 @@ public class MyAgent extends Agent {
         	values[9] = values[1] - values[5];
         	if (values[8] < 0) values[8] = -1.0 * values[8];
         	if (values[9] < 0) values[9] = -1.0 * values[9];
+        	values[10] = values[2] - values[6];
+        	/*
         	// experiment - simplify the rows
         	if (values[1] == 0) {}
         	else if (values[4] > 3.5) values[4] = 2.0;
         	else values[4] = 1.0;
         	if (values[5] == 0) {}
         	else if (values[5] > 3.5) values[5] = 2.0;
-        	else values[5] = 1.0;
+        	else values[5] = 1.0;*/
         	
-        	values[10] = myInstances.attribute(8).indexOfValue(instance.stringValue(8));
+        	values[11] = myInstances.attribute(8).indexOfValue(instance.stringValue(8));
         	if (instance.stringValue(8).startsWith("cAttack"))
         	{
         		//System.out.println(instance.stringValue(8));
