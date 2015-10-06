@@ -51,11 +51,16 @@ public class MyAgent extends Agent {
 		J48 tree = new J48();
 		tree.setMinNumObj(2);
 		tree.setConfidenceFactor(0.3f);
-		classifier_ = tree;
-		J48 tree2 = new J48();
-		tree2.setMinNumObj(50);
-		tree2.setConfidenceFactor(0.3f);
-		classifier2 = tree2;
+		//classifier_ = tree;
+		//J48 tree2 = new J48();
+		//tree2.setMinNumObj(30);
+		//tree2.setConfidenceFactor(0.3f);
+		//classifier2 = tree2;
+		//MultilayerPerceptron mp = new MultilayerPerceptron();
+		//mp.setTrainingTime(450);
+		//classifier2 = tree;
+		classifier2 = new J48();
+		
 		//classifier_ = new MultilayerPerceptron();
 		//classifier_ = new NaiveBayes();
 		//classifier_ = new IBk();
@@ -197,7 +202,7 @@ public class MyAgent extends Agent {
 		}
 		
 		try {
-			classifier_.buildClassifier(instances);
+			//classifier_.buildClassifier(instances);
 			if (useModified) classifier2.buildClassifier(modifiedInstances);
 		} catch(Exception e) {
 			System.out.println("Error training classifier: " + e.toString());
@@ -671,9 +676,9 @@ public class MyAgent extends Agent {
 			else currentInstance.setDataset(myInstances);
 			
 			//for (int i = 0; i < 8; i++) System.out.println(values[i] + " ");
-			int out;
+			int out = 0;
 			if (useModified) out = (int) classifier2.classifyInstance(currentInstance);
-			else out = (int)classifier_.classifyInstance(currentInstance);
+			//else out = (int)classifier_.classifyInstance(currentInstance);
 			Card selected = allCards.get(out);
 			if(cards.contains(selected)) {
 				return selected;
@@ -692,7 +697,7 @@ public class MyAgent extends Agent {
 
 	public void printClassifier() {
 		if (useModified) System.out.println(classifier2);
-		else System.out.println(classifier_);
+		//else System.out.println(classifier_);
 	}
 	
 	public void modifiedInstances()
