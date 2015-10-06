@@ -123,10 +123,7 @@ public class Battle {
                 if ( bs.getAgentState( a ).getHealthPoints() > 0 ) {
                     long msStart = System.currentTimeMillis();
                     Card cardAgent = agents[a].act( (StateBattle) bs.clone() );
-                    // EXTRA OUTPUT
-                    System.out.println("Card for " + a + " : " + cardAgent.getName());
                     
-                    if (p != null) p.checkGuess(cardAgent, a);
                     
                     long msDuration = System.currentTimeMillis() - msStart;
                     if ( msDuration > msPerMove ) {
@@ -144,6 +141,7 @@ public class Battle {
                         if ( card.getName().equals(cardAgent.getName()) ) {
                             actions[a] = card;
                             isLegal = true;
+                            // EXTRA OUTPUT
                             break;
                         }
                     }
@@ -156,6 +154,10 @@ public class Battle {
                 else {
                     actions[a] = null;
                 }
+            }
+            for (int i = 0; i < actions.length; i++)
+            {
+            	if (p != null) p.checkGuess(actions[i], i);
             }
             isGameOver = bs.play( actions );
             log.add( (StateBattle) bs.clone() );

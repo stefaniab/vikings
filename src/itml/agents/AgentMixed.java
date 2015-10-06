@@ -110,17 +110,8 @@ public class AgentMixed extends Agent{
     	StateAgent a = stateBattle.getAgentState(m_noThisAgent);
     	StateAgent o = stateBattle.getAgentState(m_noOpponentAgent);
     	if(a.getStaminaPoints() <= 0) return new CardRest();
-    	if (a.getHealthPoints() >= o.getHealthPoints()) 
-    	{
-    		if (a.getRow() > 3) return new CardMoveUp();
-    		else return new CardMoveDown();
-    	}
-    	else if (a.getStaminaPoints() == 1) 
-    	{
-    		if (a.getCol() > 3) return new CardMoveLeft();
-    		else return new CardMoveRight();
-    	}
-    	else return new CardAttackDiagonal();
+    	if (calcDistanceBetweenAgents(stateBattle) > 2) return actChicken(stateBattle);
+    	else return actTerminator(stateBattle);
     }
     
     private int calcDistanceBetweenAgents( StateBattle bs ) {
