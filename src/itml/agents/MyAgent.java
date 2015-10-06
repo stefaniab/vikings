@@ -55,13 +55,14 @@ public class MyAgent extends Agent {
 		J48 tree2 = new J48();
 		tree2.setMinNumObj(1);
 		//tree2.setConfidenceFactor(0.45f);
+		tree2.setConfidenceFactor(0.3f);
 		classifier2 = tree2;
 		//classifier_ = new MultilayerPerceptron();
 		//classifier_ = new NaiveBayes();
 		//classifier_ = new IBk();
 		// J48
 		
-		if (useModified) classifier_ = classifier2;
+		//if (useModified) classifier_ = classifier2;
 		
 	}
 
@@ -75,14 +76,15 @@ public class MyAgent extends Agent {
 	@Override
 	public void endGame(StateBattle stateBattle, double[] results) {
 		//To change body of implemented methods use File | Settings | File Templates.
+		// predictor.print();
 	}
 
 	@Override
 	public Card act(StateBattle stateBattle) {
 		System.out.println(stateBattle);
-		double[] values = new double[8];
 		StateAgent a = stateBattle.getAgentState(m_noOpponentAgent);
 		StateAgent o = stateBattle.getAgentState(m_noThisAgent);
+		double[] values = new double[8];
 		values[0] = a.getCol();
 		values[1] = a.getRow();
 		values[2] = a.getHealthPoints();
@@ -92,7 +94,7 @@ public class MyAgent extends Agent {
 		values[6] = o.getHealthPoints();
 		values[7] = o.getStaminaPoints();
 		
-		double[] modValues = new double[10];
+		double[] modValues = new double[11];
 		if (useModified)
 		{
 			modValues[0] = a.getCol();
@@ -105,10 +107,18 @@ public class MyAgent extends Agent {
 			modValues[7] = o.getStaminaPoints();
 			modValues[8] = modValues[0] - modValues[4];
 			modValues[9] = modValues[1] - modValues[5];
-			if (modValues[8] < 0) modValues[8] = -1.0 * modValues[8];
+			modValues[10] = modValues[2] - modValues[6];
+			/*
+			if (modValues[1] == 0) {}
+        	else if (modValues[4] > 3.5) modValues[4] = 2.0;
+        	else modValues[4] = 1.0;
+        	if (modValues[5] == 0) {}
+        	else if (modValues[5] > 3.5) modValues[5] = 2.0;
+        	else modValues[5] = 1.0;
+			*/
+        	if (modValues[8] < 0) modValues[8] = -1.0 * modValues[8];
         	if (modValues[9] < 0) modValues[9] = -1.0 * modValues[9];
 		}
-		
 		try {
 			ArrayList<Card> allCards = m_deck.getCards();
 			ArrayList<Card> cards = m_deck.getCards(a.getStaminaPoints());
@@ -119,13 +129,13 @@ public class MyAgent extends Agent {
 			if (!useModified) currentInstance.setDataset(myInstances);
 			else currentInstance.setDataset(modifiedInstances);
 			
-			double[] probabilities;
+			/*double[] probabilities;
 			if (!useModified) probabilities = classifier_.distributionForInstance(currentInstance);
 			else probabilities = classifier2.distributionForInstance(currentInstance);
-			/*for (int i = 0; i < probabilities.length; i++)
+			for (int i = 0; i < probabilities.length; i++)
 			{
 				System.out.println("Probability of card " + allCards.get(i).getName() + " : " + probabilities[i]);
-			}*/	
+			}*/
 			
 			int out;
 			if (!useModified) out = (int)classifier_.classifyInstance(currentInstance);
@@ -154,7 +164,8 @@ public class MyAgent extends Agent {
 		instances.setClassIndex(instances.numAttributes() - 1);
 		myInstances = instances;
 		
-		System.out.println("ORIGINAL");
+		/*System.out.println("ORIGINAL");
+
 		for (int i = 0; i < myInstances.numInstances(); i++)
 		{
 			Instance instance = myInstances.instance(i);
@@ -163,13 +174,15 @@ public class MyAgent extends Agent {
 				System.out.print(instance.value(j) + " ");
 			}
 			System.out.println();
-		}
+		}*/
 		
 		if (useModified) 
 		{
 			modifiedInstances();
 			modifiedInstances.setClassIndex(modifiedInstances.numAttributes() - 1);
-			System.out.println("MODIFIED");
+
+			/*System.out.println("MODIFIED");
+>>>>>>> c05a371cacbb80dc56ebfbd4bc9aa902dc81f698
 			for (int i = 0; i < modifiedInstances.numInstances(); i++)
 			{
 				Instance instance = modifiedInstances.instance(i);
@@ -178,7 +191,10 @@ public class MyAgent extends Agent {
 					System.out.print(instance.value(j) + " ");
 				}
 				System.out.println();
+<<<<<<< HEAD
 			}
+=======
+			}*/
 		}
 		
 		try {
@@ -187,7 +203,10 @@ public class MyAgent extends Agent {
 		} catch(Exception e) {
 			System.out.println("Error training classifier: " + e.toString());
 		}
-		//System.out.println(classifier_);
+		System.out.println(classifier_);
+		if (useModified) System.out.println(classifier2);
+		
+		// if (useModified) classifier_ = classifier2;
 		return null;  //To change body of implemented methods use File | Settings | File Templates.
 	}
 	
@@ -198,7 +217,7 @@ public class MyAgent extends Agent {
 		StateAgent a = stateBattle.getAgentState(m_noThisAgent);
 		StateAgent o = stateBattle.getAgentState(m_noOpponentAgent);
 
-		drawBoard(a, o);
+		//drawBoard(a, o);
 		
 		int manhattan = Math.abs(o.getCol() + opponentCard.getCol() - a.getCol()) + Math.abs(o.getRow() + opponentCard.getRow() - a.getRow());
 		int currentManhattan = Math.abs(o.getCol() - a.getCol()) + Math.abs(o.getRow() - a.getRow());
@@ -467,32 +486,40 @@ public class MyAgent extends Agent {
         	// get opponent card
         	Card newOpponentCard = getOpponentCard(newState);
         	StateAgent newAsThis = newState.getAgentState(m_noThisAgent);
-        	// get set of pooible cards
+
+        	// get set of possible cards
         	ArrayList<Card> newCards = m_deck.getCards(newAsThis.getStaminaPoints());
-        	// loop through them, generate state, rate in
-        	int newBestRating = -1000;
+        	// loop through them, generate state, rate it
+        	//Card newBestCard = null;
+        	int newBestRating = -100000;
         	StateBattle newNewState = null;
         	for (Card newCard : newCards)
         	{
         		newNewState = (StateBattle) newState.clone();
-        		Card[] newChoosenCards = new Card[2];
-        		newChoosenCards[m_noThisAgent] =newCard;
-        		newChoosenCards[m_noOpponentAgent] =newOpponentCard;
-        		newNewState.play(newChoosenCards);
+
+        		Card[] newChosenCards = new Card[2];
+        		newChosenCards[m_noThisAgent] = newCard;
+        		newChosenCards[m_noOpponentAgent] = newOpponentCard;
+        		newNewState.play(newChosenCards);
         		int newStateRating = stateRating(newNewState);
         		if (newStateRating > newBestRating)
         		{
+        			//newBestCard = newCard;
         			newBestRating = newStateRating;
         		}
+        		//System.out.println("\t LEVEL 2 OF SEARCH " + newCard.getName() + " rating " + newStateRating);
         	}*/
+        	//System.out.println("LEVEL 1 OF SEARCH " + card.getName() + " rating " + newBestRating);
         	//if (newBestRating > bestRating)
         	if (stateRating(newState) > bestRating)
         	{
         		bestCard = card;
         		//bestRating = newBestRating;
         		bestRating = stateRating(newState);
+        		//bestRating = newBestRating;
         	}
         }
+        //System.out.println("best card is " + bestCard.getName() + " with rating " + bestRating);
 		
 		// rate the states and pick the best one
 		return bestCard;
@@ -502,30 +529,33 @@ public class MyAgent extends Agent {
 	{
 		StateAgent asThis = stateBattle.getAgentState( m_noThisAgent );
         StateAgent asOpp  = stateBattle.getAgentState( m_noOpponentAgent );
+
+        if (asThis.getHealthPoints() == 0 && asOpp.getHealthPoints() > 0 ) return -1000;
+        else if (asOpp.getHealthPoints() == 0 && asThis.getHealthPoints() > 0 ) return 1000;
 		
-		if (asThis.getHealthPoints() == 0 && asOpp.getHealthPoints() > 0) return -1000;
-		else if (asOpp.getHealthPoints() == 0 && asThis.getHealthPoints() > 0 ) return 1000;
-		int rating = 0;
+        int rating = 0;
 		Random random = new Random();
 		rating += random.nextInt(10);
 		// health difference
 		rating += 50 * (asThis.getHealthPoints() - asOpp.getHealthPoints());
 		// stamina difference
 		//rating += 5 * (Math.min(asThis.getStaminaPoints(), 10) - Math.min(10, asOpp.getStaminaPoints()));
-		rating += 8 *  Math.floor(Math.sqrt(asThis.getStaminaPoints()) - Math.sqrt(asOpp.getStaminaPoints()));
+		rating += 8 * Math.floor(Math.sqrt(asThis.getStaminaPoints()) - Math.sqrt(asOpp.getStaminaPoints()));
 		// proximity
 		int manhattan = Math.abs(asThis.getCol() - asOpp.getCol()) + Math.abs(asThis.getRow() - asOpp.getRow());
+		
+		// Testing stamina penalty
+		if (asThis.getStaminaPoints() < 2) rating -= 30;
 		
 		if (asThis.getHealthPoints() > asOpp.getHealthPoints() ||
 				asThis.getHealthPoints() == asOpp.getHealthPoints() && asThis.getStaminaPoints() > asOpp.getStaminaPoints() )
 		{
-			// try to stay close to the middle
 			int x = Math.abs(2 - asThis.getCol());
 			int y = Math.abs(2 - asThis.getRow());
 			if (x == 0) rating += 3;
-			if (x == 1) rating += 2;
+			else if (x == 1) rating += 2;
 			if (y == 0) rating += 3;
-			if (y == 1) rating += 2;
+			else if (y == 1) rating += 2;
 			rating -= manhattan * 5;
 		}
 		else if (asThis.getHealthPoints() != asOpp.getHealthPoints() && asThis.getStaminaPoints() != asOpp.getStaminaPoints())
@@ -533,8 +563,9 @@ public class MyAgent extends Agent {
 			rating += manhattan * 5;
 		}
 		else rating -= manhattan * 2;
-		//System.out.println(stateBattle.toString());
-		//System.out.println("State rated as " + rating);
+		//System.out.println(stateBattle);
+		//System.out.println("has rating " + rating);
+		
 		return rating;
 	}
 	
@@ -594,6 +625,7 @@ public class MyAgent extends Agent {
 	}
 	
 
+	
 	public Card getOpponentCard(StateBattle stateBattle)
 	{
 		double[] values = new double[8];
@@ -649,7 +681,8 @@ public class MyAgent extends Agent {
 	}
 
 	public void printClassifier() {
-		System.out.println(classifier2);
+		if (useModified) System.out.println(classifier2);
+		else System.out.println(classifier_);
 	}
 	
 	public void modifiedInstances()
@@ -679,12 +712,13 @@ public class MyAgent extends Agent {
         attributes.addElement(new Attribute("o_stamina"));
         attributes.addElement(new Attribute("delta_x"));
         attributes.addElement(new Attribute("delta_y"));
+        attributes.addElement(new Attribute("delta_h"));
         // Add the class, the action the a_ agent took in the given state (nominal).
         attributes.addElement(new Attribute("a_action", actions));
         
         modifiedInstances = new Instances( "ModAgentBattleHistory", attributes, 0 );
         
-        double[] values = new double[myInstances.numAttributes() + 2];
+        double[] values = new double[myInstances.numAttributes() + 3];
         for (int i = 0; i < myInstances.numInstances(); i++)
         {
         	Instance instance = myInstances.instance(i);
@@ -692,12 +726,30 @@ public class MyAgent extends Agent {
         	{
         		values[j] = instance.value(j);
         	}
+        	
+        	
         	values[8] = values[0] - values[4];
         	values[9] = values[1] - values[5];
         	if (values[8] < 0) values[8] = -1.0 * values[8];
         	if (values[9] < 0) values[9] = -1.0 * values[9];
-        	values[10] = myInstances.attribute(8).indexOfValue(instance.stringValue(8));
-        	modifiedInstances.add(new Instance(1.0, values.clone()));
+        	values[10] = values[2] - values[6];
+        	/*
+        	// experiment - simplify the rows
+        	if (values[1] == 0) {}
+        	else if (values[4] > 3.5) values[4] = 2.0;
+        	else values[4] = 1.0;
+        	if (values[5] == 0) {}
+        	else if (values[5] > 3.5) values[5] = 2.0;
+        	else values[5] = 1.0;*/
+        	
+        	values[11] = myInstances.attribute(8).indexOfValue(instance.stringValue(8));
+        	if (instance.stringValue(8).startsWith("cAttack"))
+        	{
+        		//System.out.println(instance.stringValue(8));
+        		// attack actions have higher weight
+        		modifiedInstances.add(new Instance(1.0, values.clone()));
+        	}
+        	else modifiedInstances.add(new Instance(1.0, values.clone()));
         }
 	}
 }

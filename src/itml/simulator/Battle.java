@@ -92,6 +92,7 @@ public class Battle {
     */
     public void run( boolean doDebug, int maxSteps, int msPerMove, Agent[] agents, double [] score, GameLog log, Predictor p ) {
 
+    	
     	System.out.println();
     	System.out.println("NEW GAME");
     	System.out.println("AGENTS: " + agents[0].toString() + " " + agents[1].toString());

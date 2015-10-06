@@ -1,6 +1,13 @@
 package itml.agents;
 
 import itml.cards.Card;
+import itml.cards.CardAttackDiagonal;
+import itml.cards.CardLeapLeft;
+import itml.cards.CardLeapRight;
+import itml.cards.CardMoveDown;
+import itml.cards.CardMoveLeft;
+import itml.cards.CardMoveRight;
+import itml.cards.CardMoveUp;
 import itml.cards.CardRest;
 import itml.simulator.CardDeck;
 import itml.simulator.StateAgent;
@@ -100,15 +107,20 @@ public class AgentMixed extends Agent{
     
     public Card act(StateBattle stateBattle)
     {
-    	Random random = new Random();
     	StateAgent a = stateBattle.getAgentState(m_noThisAgent);
     	StateAgent o = stateBattle.getAgentState(m_noOpponentAgent);
-    	if(a.getHealthPoints() > o.getHealthPoints()) return actTerminator(stateBattle);
-    	else if (a.getHealthPoints() < o.getHealthPoints()) return actChicken(stateBattle);
-    	int manhattan = Math.abs(a.getCol() - o.getCol()) + Math.abs(a.getRow() - o.getRow());
-    	int standard = 3;
-    	if (manhattan > standard) return actTerminator(stateBattle);
-    	else return actChicken(stateBattle);
+    	if(a.getStaminaPoints() <= 0) return new CardRest();
+    	if (a.getHealthPoints() >= o.getHealthPoints()) 
+    	{
+    		if (a.getRow() > 3) return new CardMoveUp();
+    		else return new CardMoveDown();
+    	}
+    	else if (a.getStaminaPoints() == 1) 
+    	{
+    		if (a.getCol() > 3) return new CardMoveLeft();
+    		else return new CardMoveRight();
+    	}
+    	else return new CardAttackDiagonal();
     }
     
     private int calcDistanceBetweenAgents( StateBattle bs ) {
