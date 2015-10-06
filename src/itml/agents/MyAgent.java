@@ -57,13 +57,13 @@ public class MyAgent extends Agent {
 		//tree2.setConfidenceFactor(0.3f);
 		//classifier2 = tree2;
 		//MultilayerPerceptron mp = new MultilayerPerceptron();
-		//mp.setTrainingTime(450);
+		//mp.setTrainingTime(400);
 		//classifier2 = tree;
 		classifier2 = new J48();
 		
-		//classifier_ = new MultilayerPerceptron();
+		//classifier2 = mp;
 		//classifier_ = new NaiveBayes();
-		//classifier_ = new IBk();
+		//classifier2 = new IBk();
 		// J48
 		
 		//if (useModified) classifier_ = classifier2;
@@ -89,6 +89,7 @@ public class MyAgent extends Agent {
 		System.out.println(stateBattle);
 		StateAgent a = stateBattle.getAgentState(m_noOpponentAgent);
 		StateAgent o = stateBattle.getAgentState(m_noThisAgent);
+		
 		double[] values = new double[8];
 		values[0] = a.getCol();
 		values[1] = a.getRow();
@@ -148,6 +149,7 @@ public class MyAgent extends Agent {
 			
 			Card selected = allCards.get(out);
 			predictor.setCard(selected);
+			System.out.println("Number of steps taken: " + stateBattle.getStepNumber());
 			System.out.print("Predicted opponent card: " + selected.getName() + " ");
 			if(cards.contains(selected)) {
 				//return selected;
@@ -569,9 +571,10 @@ public class MyAgent extends Agent {
 		{
 			rating += manhattan * 5;
 		}
+		//Get more aggressive after more steps
 		if (stateBattle.getStepNumber() < 10) rating -= manhattan * 1;
-		else if (stateBattle.getStepNumber() < 20) rating -= manhattan * 2;
-		else if (stateBattle.getStepNumber() < 30) rating -= manhattan * 3;
+		else if (stateBattle.getStepNumber() < 20 && asThis.getHealthPoints() >= asOpp.getHealthPoints()) rating -= manhattan * 2;
+		else if (stateBattle.getStepNumber() < 30 && asThis.getHealthPoints() >= asOpp.getHealthPoints()) rating -= manhattan * 6;
 		//System.out.println(stateBattle);
 		//System.out.println("has rating " + rating);
 		
