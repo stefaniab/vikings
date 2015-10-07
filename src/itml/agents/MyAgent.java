@@ -791,26 +791,5 @@ public class MyAgent extends Agent {
         	else modifiedInstances.add(new Instance(1.0, values.clone()));
         }
 	}
-	
-	public int deepRating(StateBattle sb)
-	{
-		Card oppCard = getOpponentCard(sb);
-		StateAgent asThis = sb.getAgentState( m_noThisAgent );
-        ArrayList<Card> cards = m_deck.getCards( asThis.getStaminaPoints() );
-        StateBattle newState = null;
-        Card[] actions = new Card[2];
-        actions[m_noOpponentAgent] = oppCard;
-        int bestRating = -1000;
-        for (Card ourCard : cards)
-        {
-        	newState = (StateBattle) sb.clone();
-        	actions[m_noThisAgent] = ourCard;
-        	newState.play(actions);
-        	int rating = stateRating(newState);
-        	if (rating > bestRating) bestRating = rating;
-        }
-        return bestRating;
-		
-	}
 }
 
