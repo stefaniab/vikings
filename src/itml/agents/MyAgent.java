@@ -576,9 +576,13 @@ public class MyAgent extends Agent {
 		else if (asOpp.getStaminaPoints() == 0 && manhattan == 2 && asThis.getCol() != asOpp.getCol() && asThis.getStaminaPoints() > 1) rating += 25;
 		else if (asOpp.getStaminaPoints() == 1 && manhattan == 0 && asThis.getStaminaPoints() > 1) rating += 15;
 		
+		if (asThis.getStaminaPoints() == 0 && manhattan < 2 && asOpp.getStaminaPoints() > 1) rating += 25;
+		else if (asThis.getStaminaPoints() == 0 && manhattan == 2 && asOpp.getCol() != asOpp.getCol() && asOpp.getStaminaPoints() > 1) rating += 25;
+		else if (asThis.getStaminaPoints() == 1 && manhattan == 0 && asOpp.getStaminaPoints() > 1) rating += 15;
+		
 		
 		// Testing stamina penalty
-		if (asThis.getStaminaPoints() < 2) rating -= 20;
+		//if (asThis.getStaminaPoints() < 2) rating -= 20;
 		
 		// Try to stay close to the middle if we have the upper hand
 		if (asThis.getHealthPoints() > asOpp.getHealthPoints() ||
