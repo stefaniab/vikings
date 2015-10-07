@@ -59,7 +59,7 @@ public class MyAgent extends Agent {
 		//MultilayerPerceptron mp = new MultilayerPerceptron();
 		//mp.setTrainingTime(400);
 		//classifier2 = tree;
-		classifier2 = new J48();
+		classifier2 = tree;
 		
 		//classifier2 = mp;
 		//classifier_ = new NaiveBayes();
@@ -148,8 +148,8 @@ public class MyAgent extends Agent {
 			else out =  (int)classifier2.classifyInstance(currentInstance);
 			
 			Card selected = allCards.get(out);
+			if (a.getStaminaPoints() < 1) selected = new CardRest();
 			predictor.setCard(selected);
-			System.out.println("Number of steps taken: " + stateBattle.getStepNumber());
 			System.out.print("Predicted opponent card: " + selected.getName() + " ");
 			if(cards.contains(selected)) {
 				//return selected;
@@ -227,11 +227,6 @@ public class MyAgent extends Agent {
 		
 		int manhattan = Math.abs(o.getCol() + opponentCard.getCol() - a.getCol()) + Math.abs(o.getRow() + opponentCard.getRow() - a.getRow());
 		int currentManhattan = Math.abs(o.getCol() - a.getCol()) + Math.abs(o.getRow() - a.getRow());
-		
-		//System.out.print("BATTLESTATE: health/stamina a: " + a.getHealthPoints() + " " + a.getStaminaPoints() + " o: "+ o.getHealthPoints() + " " + o.getStaminaPoints() + " ");
-		//System.out.print("Location: " + a.getRow() + " " + a.getCol() + " " + o.getRow() + " " + o.getCol() + " ");
-		
-		//System.out.println("current manhattan : " + currentManhattan + " predicted manhattan : " + manhattan);
 		
 		// Resting
 		if (a.getStaminaPoints() == 0 || a.getStaminaPoints() < 4 && manhattan > 3) return new CardRest();
@@ -474,6 +469,7 @@ public class MyAgent extends Agent {
 	private Card getMove1(StateBattle stateBattle, Card opponentCard)
 	{
 		StateAgent asThis = stateBattle.getAgentState( m_noThisAgent );
+		StateAgent asOpp = stateBattle.getAgentState(m_noOpponentAgent);
         ArrayList<Card> cards = m_deck.getCards( asThis.getStaminaPoints() );
 		// assume opponentCard is chosen
 		// for each possible card, compute state
@@ -518,6 +514,7 @@ public class MyAgent extends Agent {
         	}*/
         	//System.out.println("LEVEL 1 OF SEARCH " + card.getName() + " rating " + newBestRating);
         	//if (newBestRating > bestRating)
+        	
         	if (stateRating(newState) > bestRating)
         	{
         		bestCard = card;
@@ -527,9 +524,31 @@ public class MyAgent extends Agent {
         	}
         }
         //System.out.println("best card is " + bestCard.getName() + " with rating " + bestRating);
+        
+        ArrayList<Card> oppCards = m_deck.getCards( asOpp.getStaminaPoints() );
+        for (Card oppCard : oppCards)
+        {
+        	newState = (StateBattle) stateBattle.clone();
+        	Card[] actions = new Card[2];
+        	actions[m_noOpponentAgent] = oppCard;
+        	actions[m_noThisAgent] = bestCard;
+        	newState.play(actions);
+        	System.out.print("o act " + oppCard.getName() + " r " + stateRating(newState) + " ");
+        	if (stateRating(newState) < -1000) 
+        	{
+        		System.out.println("LOSING MOVE");
+        		System.out.println("LOSING MOVE");
+        	}
+        }
+        Card[] actions = new Card[2];
+        actions[m_noThisAgent] = bestCard;
+        actions[m_noOpponentAgent] = opponentCard;
+        StateBattle future = (StateBattle) stateBattle.clone();
+        future.play(actions);
+        System.out.println();
+        System.out.println("Predicted next move " + getOpponentCard(future).getName());
 		
-		// rate the states and pick the best one
-		return bestCard;
+        return bestCard;
 	}
 	
 	public int stateRating(StateBattle stateBattle)
@@ -645,8 +664,10 @@ public class MyAgent extends Agent {
 	
 	public Card getOpponentCard(StateBattle stateBattle)
 	{
+		StateAgent asOpp = stateBattle.getAgentState(m_noOpponentAgent);
+		if (asOpp.getStaminaPoints() < 1) return new CardRest();
+		
 		double[] values = new double[8];
-		// POSSIBLE ERROR
 		StateAgent a = stateBattle.getAgentState(m_noOpponentAgent);
 		StateAgent o = stateBattle.getAgentState(m_noThisAgent);
 		values[0] = a.getCol();
@@ -774,6 +795,27 @@ public class MyAgent extends Agent {
         	}
         	else modifiedInstances.add(new Instance(1.0, values.clone()));
         }
+	}
+	
+	public int deepRating(StateBattle sb)
+	{
+		Card oppCard = getOpponentCard(sb);
+		StateAgent asThis = sb.getAgentState( m_noThisAgent );
+        ArrayList<Card> cards = m_deck.getCards( asThis.getStaminaPoints() );
+        StateBattle newState = null;
+        Card[] actions = new Card[2];
+        actions[m_noOpponentAgent] = oppCard;
+        int bestRating = -1000;
+        for (Card ourCard : cards)
+        {
+        	newState = (StateBattle) sb.clone();
+        	actions[m_noThisAgent] = ourCard;
+        	newState.play(actions);
+        	int rating = stateRating(newState);
+        	if (rating > bestRating) bestRating = rating;
+        }
+        return bestRating;
+		
 	}
 }
 
