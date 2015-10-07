@@ -536,16 +536,19 @@ public class MyAgent extends Agent {
 	{
 		StateAgent asThis = stateBattle.getAgentState( m_noThisAgent );
         StateAgent asOpp  = stateBattle.getAgentState( m_noOpponentAgent );
-
+        
+        //are we either loosing or winning
         if (asThis.getHealthPoints() == 0 && asOpp.getHealthPoints() > 0 ) return -1000;
         else if (asOpp.getHealthPoints() == 0 && asThis.getHealthPoints() > 0 ) return 1000;
 		
         int rating = 0;
 		Random random = new Random();
 		rating += random.nextInt(10);
-		// health difference
+		
+		// Health difference
 		rating += 50 * (asThis.getHealthPoints() - asOpp.getHealthPoints());
-		// stamina difference
+		
+		// Stamina difference
 		//rating += 5 * (Math.min(asThis.getStaminaPoints(), 10) - Math.min(10, asOpp.getStaminaPoints()));
 		rating += 8 * Math.floor(Math.sqrt(asThis.getStaminaPoints()) - Math.sqrt(asOpp.getStaminaPoints()));
 		// proximity
@@ -556,6 +559,7 @@ public class MyAgent extends Agent {
 		// Testing stamina penalty
 		if (asThis.getStaminaPoints() < 2) rating -= 20;
 		
+		// Try to stay close to the middle if we have the upper hand
 		if (asThis.getHealthPoints() > asOpp.getHealthPoints() ||
 				asThis.getHealthPoints() == asOpp.getHealthPoints() && asThis.getStaminaPoints() > asOpp.getStaminaPoints() )
 		{
@@ -567,6 +571,7 @@ public class MyAgent extends Agent {
 			else if (y == 1) rating += 2;
 			rating -= manhattan * 5;
 		}
+		// Try to flee if the opponent has the upper hand
 		else if (asThis.getHealthPoints() != asOpp.getHealthPoints() && asThis.getStaminaPoints() != asOpp.getStaminaPoints())
 		{
 			rating += manhattan * 5;
