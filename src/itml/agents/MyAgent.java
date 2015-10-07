@@ -49,7 +49,7 @@ public class MyAgent extends Agent {
 	public MyAgent( CardDeck deck, int msConstruct, int msPerMove, int msLearn ) {
 		super(deck, msConstruct, msPerMove, msLearn);
 		J48 tree = new J48();
-		tree.setMinNumObj(2);
+		tree.setMinNumObj(10);
 		tree.setConfidenceFactor(0.3f);
 		//classifier_ = tree;
 		//J48 tree2 = new J48();
@@ -59,7 +59,7 @@ public class MyAgent extends Agent {
 		//MultilayerPerceptron mp = new MultilayerPerceptron();
 		//mp.setTrainingTime(400);
 		//classifier2 = tree;
-		classifier2 = new J48();
+		classifier2 = tree;
 		
 		//classifier2 = mp;
 		//classifier_ = new NaiveBayes();
@@ -474,6 +474,7 @@ public class MyAgent extends Agent {
 	private Card getMove1(StateBattle stateBattle, Card opponentCard)
 	{
 		StateAgent asThis = stateBattle.getAgentState( m_noThisAgent );
+		StateAgent asOpp = stateBattle.getAgentState(m_noOpponentAgent);
         ArrayList<Card> cards = m_deck.getCards( asThis.getStaminaPoints() );
 		// assume opponentCard is chosen
 		// for each possible card, compute state
@@ -527,6 +528,22 @@ public class MyAgent extends Agent {
         	}
         }
         //System.out.println("best card is " + bestCard.getName() + " with rating " + bestRating);
+        
+        ArrayList<Card> oppCards = m_deck.getCards( asOpp.getStaminaPoints() );
+        for (Card oppCard : oppCards)
+        {
+        	newState = (StateBattle) stateBattle.clone();
+        	Card[] actions = new Card[2];
+        	actions[m_noOpponentAgent] = oppCard;
+        	actions[m_noThisAgent] = bestCard;
+        	newState.play(actions);
+        	System.out.print("o act " + oppCard.getName() + " r " + stateRating(newState) + " ");
+        	if (stateRating(newState) < -1000) 
+        	{
+        		System.out.println("LOSING MOVE");
+        		System.out.println("LOSING MOVE");
+        	}
+        }
 		
 		// rate the states and pick the best one
 		return bestCard;
