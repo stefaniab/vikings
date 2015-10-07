@@ -594,6 +594,7 @@ public class MyAgent extends Agent {
 			else if (x == 1) rating += 2;
 			if (y == 0) rating += 3;
 			else if (y == 1) rating += 2;
+			
 			rating -= manhattan * 5;
 		}
 		// Try to flee if the opponent has the upper hand

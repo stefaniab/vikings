@@ -59,7 +59,7 @@ public class AgentLazyTerminator extends Agent {
         		return new CardAttackCardinal();
         	}
         	if (asThis.getRow() == asOpp.getRow() && dist == 2) return new CardAttackLong();
-        	if (dist == 2) return new CardAttackDiagonal();
+        	if (dist == 2 && asThis.getCol() != asOpp.getCol()) return new CardAttackDiagonal();
         	if (dist == 1) return new CardAttackCardinal();
         	return new CardRest();
         }
