@@ -34,9 +34,9 @@ public class Predictor {
 	}
 	public void setCard(Card card)
 	{
-		System.out.println("setCard");
-		if (!waitingForGuess) 
-			System.out.print("ERROR, out of order");
+		//System.out.println("setCard");
+		//if (!waitingForGuess) 
+			//System.out.print("ERROR, out of order");
 		lastCard = card;
 		waitingForGuess = false;
 	}
@@ -44,23 +44,23 @@ public class Predictor {
 	{
 		// attack, defend, move, rest
 		if (this.id != id) return;
-		System.out.println("checkGuess");
-		if (waitingForGuess) 
-			System.out.print("ERROR, out of order");
+		//System.out.println("checkGuess");
+		//if (waitingForGuess) 
+			//System.out.print("ERROR, out of order");
 		waitingForGuess = true;
 		if (card == null) 
 		{
-			System.out.println("NULL GUESS");
+			//System.out.println("NULL GUESS");
 			return;
 		}
 		if (lastCard == null)
 		{
-			System.out.println("NULL LAST GUESS");
+			//System.out.println("NULL LAST GUESS");
 			return;
 		}
 		if (lastCard.getName() == card.getName())
 		{
-			System.out.println("CORRECT GUESS");
+			//System.out.println("CORRECT GUESS");
 			right++;
 			if (card.getName().startsWith("cAttack")) correctClass[0]++;
 			else if (card.getName().startsWith("cDefend")) correctClass[1]++;
@@ -70,8 +70,8 @@ public class Predictor {
 		else 
 		{
 			wrong++;
-			System.out.println("Our guess " + lastCard.getName() + " real card " + card.getName());
-			System.out.println("INCORRECT GUESS");
+			//System.out.println("Our guess " + lastCard.getName() + " real card " + card.getName());
+			//System.out.println("INCORRECT GUESS");
 			int actual = 0;
 			if (card.getName().startsWith("cAttack")) actual = 0;
 			else if (card.getName().startsWith("cDefend")) actual = 1;

@@ -4,7 +4,7 @@ import itml.cards.*;
 import itml.simulator.CardDeck;
 import itml.simulator.StateAgent;
 import itml.simulator.StateBattle;
-import itml.Predictor;
+//import itml.Predictor;
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.functions.MultilayerPerceptron;
@@ -39,7 +39,7 @@ public class MyAgent extends Agent {
 	private int m_noThisAgent;     // Index of our agent (0 or 1).
 	private int m_noOpponentAgent; // Inex of opponent's agent.
 	private Classifier classifier2;
-	public Predictor predictor;
+	//public Predictor predictor;
 	Instances myInstances;
 	Instances modifiedInstances;
 	
@@ -63,7 +63,7 @@ public class MyAgent extends Agent {
 		// Remember the indices of the agents in the StateBattle.
 		m_noThisAgent = noThisAgent;
 		m_noOpponentAgent  = (noThisAgent == 0 ) ? 1 : 0; // can assume only 2 agents battling.
-		predictor.setID(m_noOpponentAgent);
+		//predictor.setID(m_noOpponentAgent);
 	}
 
 	@Override
@@ -123,7 +123,7 @@ public class MyAgent extends Agent {
 			
 			Card selected = allCards.get(out);
 			if (a.getStaminaPoints() < 1) selected = new CardRest();
-			predictor.setCard(selected);
+			//predictor.setCard(selected);
 			if(cards.contains(selected)) {
 				Card ourCard = getMove1(stateBattle, selected);
 				return ourCard;
@@ -360,12 +360,12 @@ public class MyAgent extends Agent {
 		}
 		return new CardRest();  //To change body of implemented methods use File | Settings | File Templates.
 	}
-	
+	/*
 	public void setPredictor(Predictor p)
 	{
 		predictor = p;
 		p.setID(m_noOpponentAgent);
-	}
+	}*/
 
 	public void printClassifier() {
 		System.out.println(classifier2);
