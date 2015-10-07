@@ -568,8 +568,8 @@ public class MyAgent extends Agent {
 		rating += 50 * (asThis.getHealthPoints() - asOpp.getHealthPoints());
 		
 		// Stamina difference
-		//rating += 5 * (Math.min(asThis.getStaminaPoints(), 10) - Math.min(10, asOpp.getStaminaPoints()));
-		rating += 8 * Math.floor(Math.sqrt(asThis.getStaminaPoints()) - Math.sqrt(asOpp.getStaminaPoints()));
+		rating += 5 * (Math.min(asThis.getStaminaPoints(), 10) - Math.min(10, asOpp.getStaminaPoints()));
+		//rating += 5 * Math.floor(Math.sqrt(asThis.getStaminaPoints()) - Math.sqrt(asOpp.getStaminaPoints()));
 		// proximity
 		int manhattan = Math.abs(asThis.getCol() - asOpp.getCol()) + Math.abs(asThis.getRow() - asOpp.getRow());
 		if (asOpp.getStaminaPoints() == 0 && manhattan == 0 && asThis.getStaminaPoints() > 1) rating += 20;
