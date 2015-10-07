@@ -38,7 +38,6 @@ import java.util.Random;
 public class MyAgent extends Agent {
 	private int m_noThisAgent;     // Index of our agent (0 or 1).
 	private int m_noOpponentAgent; // Inex of opponent's agent.
-	private Classifier classifier_;
 	private Classifier classifier2;
 	public Predictor predictor;
 	Instances myInstances;
@@ -50,18 +49,11 @@ public class MyAgent extends Agent {
 		J48 tree = new J48();
 		tree.setMinNumObj(2);
 		tree.setConfidenceFactor(0.3f);
-		//classifier_ = tree;
-		//J48 tree2 = new J48();
-		//tree2.setMinNumObj(30);
-		//tree2.setConfidenceFactor(0.3f);
-		//classifier2 = tree2;
 		//MultilayerPerceptron mp = new MultilayerPerceptron();
 		//mp.setTrainingTime(400);
-		//classifier2 = tree;
 		classifier2 = tree;
 		
 		//classifier2 = mp;
-		//classifier_ = new NaiveBayes();
 		//classifier2 = new IBk();
 		
 	}
