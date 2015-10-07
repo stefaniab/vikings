@@ -559,7 +559,7 @@ public class MyAgent extends Agent {
         //are we either loosing or winning
         if (asThis.getHealthPoints() == 0 && asOpp.getHealthPoints() > 0 ) return -1000;
         else if (asOpp.getHealthPoints() == 0 && asThis.getHealthPoints() > 0 ) return 1000;
-		
+        int manhattan = Math.abs(asThis.getCol() - asOpp.getCol()) + Math.abs(asThis.getRow() - asOpp.getRow());
         int rating = 0;
 		Random random = new Random();
 		rating += random.nextInt(10);
@@ -571,9 +571,11 @@ public class MyAgent extends Agent {
 		rating += 5 * (Math.min(asThis.getStaminaPoints(), 10) - Math.min(10, asOpp.getStaminaPoints()));
 		//rating += 5 * Math.floor(Math.sqrt(asThis.getStaminaPoints()) - Math.sqrt(asOpp.getStaminaPoints()));
 		// proximity
-		int manhattan = Math.abs(asThis.getCol() - asOpp.getCol()) + Math.abs(asThis.getRow() - asOpp.getRow());
-		if (asOpp.getStaminaPoints() == 0 && manhattan == 0 && asThis.getStaminaPoints() > 1) rating += 20;
-		//if (asOpp.getStaminaPoints() == 0 && manhattan == 1 && asThis.getStaminaPoints() > 1) rating += 10;
+		
+		if (asOpp.getStaminaPoints() == 0 && manhattan < 2 && asThis.getStaminaPoints() > 1) rating += 25;
+		else if (asOpp.getStaminaPoints() == 0 && manhattan == 2 && asThis.getCol() != asOpp.getCol() && asThis.getStaminaPoints() > 1) rating += 25;
+		else if (asOpp.getStaminaPoints() == 1 && manhattan == 0 && asThis.getStaminaPoints() > 1) rating += 15;
+		
 		
 		// Testing stamina penalty
 		if (asThis.getStaminaPoints() < 2) rating -= 20;
@@ -604,6 +606,8 @@ public class MyAgent extends Agent {
 		
 		return rating;
 	}
+	
+	
 	
 	Card getRandomMove(StateAgent a)
 	{
@@ -795,27 +799,6 @@ public class MyAgent extends Agent {
         	}
         	else modifiedInstances.add(new Instance(1.0, values.clone()));
         }
-	}
-	
-	public int deepRating(StateBattle sb)
-	{
-		Card oppCard = getOpponentCard(sb);
-		StateAgent asThis = sb.getAgentState( m_noThisAgent );
-        ArrayList<Card> cards = m_deck.getCards( asThis.getStaminaPoints() );
-        StateBattle newState = null;
-        Card[] actions = new Card[2];
-        actions[m_noOpponentAgent] = oppCard;
-        int bestRating = -1000;
-        for (Card ourCard : cards)
-        {
-        	newState = (StateBattle) sb.clone();
-        	actions[m_noThisAgent] = ourCard;
-        	newState.play(actions);
-        	int rating = stateRating(newState);
-        	if (rating > bestRating) bestRating = rating;
-        }
-        return bestRating;
-		
 	}
 }
 
